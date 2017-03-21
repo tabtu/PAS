@@ -5,13 +5,18 @@ import android.os.Bundle;
 import android.os.Handler;
 import android.os.Message;
 import android.view.View;
+import android.widget.AdapterView;
+import android.widget.ArrayAdapter;
 import android.widget.Button;
 import android.widget.EditText;
+import android.widget.ListView;
 import android.widget.TextView;
 import android.content.Intent;
 
 import java.io.BufferedReader;
 import java.io.IOException;
+import java.io.InputStream;
+import java.io.ByteArrayOutputStream;
 import java.io.InputStreamReader;
 import java.io.PrintWriter;
 import java.net.Socket;
@@ -20,7 +25,6 @@ import java.util.ArrayList;
 import java.nio.ByteBuffer;
 import java.nio.CharBuffer;
 import java.nio.charset.Charset;
-import java.io.InputStream;
 
 public class MainActivity extends Activity {
 
@@ -35,9 +39,10 @@ public class MainActivity extends Activity {
 
     private Thread mThread = null;
     private Socket mSocket = null;
-    //static InputStream minps = null;
-    static BufferedReader mBufferedReader	= null;
-    static PrintWriter mPrintWriter = null;
+
+    private InputStream mInps = null;
+    //private BufferedReader mBufferedReader	= null;
+    private PrintWriter mPrintWriter = null;
     private  String recvMessage = "";
 
     private List<SerMod> servlist = new ArrayList<SerMod>();
@@ -49,11 +54,12 @@ public class MainActivity extends Activity {
             super.handleMessage(msg);
             if(msg.what == 0)
             {
-                tv_status.setText("Received " + (recvMessage.length() - 1) + " bytes\n" + "-->Msg: " + recvMessage + "\n" + tv_status.getText().toString());
+                tv_status.setText("Received " + (recvMessage.length()) + " bytes\n" + "-->Msg: " + recvMessage + "\n" + tv_status.getText().toString());
             }
             else if(msg.what == -1)
             {
-                tv_status.setText("Received Server Data " + (recvMessage.length() - 1) + " bytes\n");
+                //tv_status.setText(recvMessage);
+                tv_status.setText("Received Server Data: " + servlist.size() + " servers are online\n" + tv_status.getText().toString());
                 btn_gtlist.setEnabled(true);
             }
             else if(msg.what == 1)
@@ -107,55 +113,73 @@ public class MainActivity extends Activity {
             try
             {
                 mSocket = new Socket(sIP, port);
-                //minps = mSocket.getInputStream();
-                mBufferedReader = new BufferedReader(new InputStreamReader(mSocket.getInputStream()));
+
+                mInps = mSocket.getInputStream();
+
+                //mBufferedReader = new BufferedReader(new InputStreamReader(mInps, "UTF-8"));
                 mPrintWriter = new PrintWriter(mSocket.getOutputStream(), true);
+
+                mPrintWriter.print("Get Server Information");
+                mPrintWriter.flush();
+
                 Message msg = new Message();
                 msg.what = 3;
                 tHandler.sendMessage(msg);
             }
             catch (Exception e)
             {
-                recvMessage = e.getMessage() + "\n";
+                recvMessage = e.getMessage();
                 Message msg = new Message();
                 msg.what = 4;
                 tHandler.sendMessage(msg);
                 return;
             }
 
-            char[] buffer = new char[MAX_BUFFER];
+            //char[] buffer = new char[MAX_BUFFER];
+            byte[] buffer = new byte[MAX_BUFFER];
             int count = 0;
             while (isConnecting)
             {
                 try
                 {
-                    if((count = mBufferedReader.read(buffer)) > 0) {
-
-                        if (count % MdfySS == 2) {
-                            byte[] byteData = getBytes(buffer);
+                    //count = mBufferedReader.read(buffer);
+                    count = mInps.read(buffer);
+                    if(count > 0) {
+                        if (count != 1 && count % MdfySS == 1) {
+                            //byte[] byteData = new byte[MAX_BUFFER];
+                            //int len = mInps.read(byteData);
                             //byteData = getBytes(buffer);
                             //int len = minps.read(byteData);  // 136byte for each, '\0' in the last
                             servlist = new ArrayList<SerMod>();
                             int ctmp = count / MdfySS;
                             for (int i = 0; i < ctmp; i++) {
-                                byte[] btmp = new byte[MdfySS];
-                                System.arraycopy(byteData, i * MdfySS, btmp, 0, MdfySS);
-                                SerMod tmp = new SerMod(btmp);
+                                //byte[] btm = new byte[MAX_BUFFER];
+                                //mInps.read(btm, 0, count);
+                                //byte[] btmp = getBytes(buffer);
+                                byte[] ele = new byte[MdfySS];
+                                System.arraycopy(buffer, i * MdfySS, ele, 0, MdfySS);
+                                SerMod tmp = new SerMod(ele);
+                                //recvMessage =tmp.getMsgHex(getBytes(btmp));
+                                //tmp.totalWload = 1.0;  // fix test
                                 servlist.add(tmp);
                             }
+                            Message msg = new Message();
+                            msg.what = -1;
+                            tHandler.sendMessage(msg);
                         }
+                        else {
+                            //recvMessage = char2string(buffer, count);
 
-
-                        recvMessage = getInfoBuff(buffer, count) + "\n";
-                        Message msg = new Message();
-                        if (servlist.size() > 0) msg.what = -1;
-                        else msg.what = 0;
-                        tHandler.sendMessage(msg);
+                            recvMessage = char2string(getChars(buffer), count);
+                            Message msg = new Message();
+                            msg.what = 0;
+                            tHandler.sendMessage(msg);
+                        }
                     }
                 }
                 catch (Exception e)
                 {
-                    recvMessage = e.getMessage() + "\n";
+                    recvMessage = e.getMessage();
                     Message msg = new Message();
                     msg.what = -2;
                     tHandler.sendMessage(msg);
@@ -168,6 +192,8 @@ public class MainActivity extends Activity {
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main);
+
+        //setContentView(R.layout.activity_serv);
 
         et_ip = (EditText)findViewById(R.id.et_ip);
         tv_status = (TextView)findViewById(R.id.tv_status);
@@ -217,21 +243,20 @@ public class MainActivity extends Activity {
             @Override
             public void onClick(View v)
             {
-                String msg = "";
+                ArrayList<String> msg = new ArrayList<String>();
                 for (int i = 0; i < servlist.size(); i++) {
-                    msg += (servlist.get(i).ToStringExt() + "/");
+                    msg.add(servlist.get(i).ToStringExt());
                 }
                 Intent intent = new Intent();
-                intent.putExtra("servlist", msg);
-                intent.setClass(MainActivity.this, ServActivity.class);
+                intent.putStringArrayListExtra("servlist", msg);
+                intent.setClass(MainActivity.this, SlstActivity.class);
                 startActivity(intent);
-
             }
         });
     }
 
     private byte[] getBytes (char[] chars) {
-        Charset cs = Charset.forName ("ASCII");
+        Charset cs = Charset.forName ("UTF-8");
         CharBuffer cb = CharBuffer.allocate (chars.length);
         cb.put (chars);
         cb.flip ();
@@ -240,9 +265,22 @@ public class MainActivity extends Activity {
         return bb.array();
 
     }
+    private static String byte2hex(byte [] buffer){
+        String h = "";
 
+        for(int i = 0; i < buffer.length; i++){
+            String temp = Integer.toHexString(buffer[i] & 0xFF);
+            if(temp.length() == 1){
+                temp = "0" + temp;
+            }
+            h = h + " "+ temp;
+        }
+
+        return h;
+
+    }
     private char[] getChars (byte[] bytes) {
-        Charset cs = Charset.forName ("ASCII");
+        Charset cs = Charset.forName ("UTF-8");
         ByteBuffer bb = ByteBuffer.allocate (bytes.length);
         bb.put (bytes);
         bb.flip ();
@@ -251,7 +289,7 @@ public class MainActivity extends Activity {
         return cb.array();
     }
 
-    private String getInfoBuff(char[] buff, int count) {
+    private String char2string(char[] buff, int count) {
         char[] temp = new char[count];
         for(int i = 0; i < count; i++)
         {
