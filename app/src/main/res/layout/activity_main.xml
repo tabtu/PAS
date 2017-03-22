@@ -12,7 +12,7 @@
         android:layout_height="46dp"
         android:layout_marginLeft="16dp"
         android:ems="10"
-        android:hint="222.222.222.3:18888"
+        android:hint="192.168.1.1:18888"
         android:inputType="text"
         app:layout_constraintLeft_toLeftOf="parent"
         tools:layout_editor_absoluteY="8dp" />

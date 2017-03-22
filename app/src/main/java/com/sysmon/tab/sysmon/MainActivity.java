@@ -203,7 +203,7 @@ public class MainActivity extends Activity {
         btn_connect.setEnabled(true);
         btn_gtlist.setEnabled(false);
 
-        et_ip.setText("222.222.222.3:18888");
+        //et_ip.setText("222.222.222.3:18888");
 
         btn_connect.setOnClickListener(new View.OnClickListener() {
             @Override
@@ -249,10 +249,28 @@ public class MainActivity extends Activity {
                 }
                 Intent intent = new Intent();
                 intent.putStringArrayListExtra("servlist", msg);
-                intent.setClass(MainActivity.this, SlstActivity.class);
+                //intent.putExtra("serv", servlist.get(0).ToStringExt());
+                intent.setClass(MainActivity.this, MssActivity.class);
                 startActivity(intent);
             }
         });
+    }
+
+    public static double bytes2Double(byte[] arr) {
+        long value = 0;
+        for (int i = 0; i < 8; i++) {
+            value |= ((long) (arr[i] & 0xff)) << (8 * i);
+        }
+        return Double.longBitsToDouble(value);
+    }
+
+    public static byte[] double2Bytes(double d) {
+        long value = Double.doubleToRawLongBits(d);
+        byte[] byteRet = new byte[8];
+        for (int i = 0; i < 8; i++) {
+            byteRet[i] = (byte) ((value >> 8 * i) & 0xff);
+        }
+        return byteRet;
     }
 
     private byte[] getBytes (char[] chars) {
