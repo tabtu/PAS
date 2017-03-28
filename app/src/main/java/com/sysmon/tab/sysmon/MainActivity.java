@@ -9,7 +9,6 @@ import android.widget.Button;
 import android.widget.EditText;
 import android.widget.TextView;
 import android.content.Intent;
-import android.widget.Toast;
 
 import java.io.IOException;
 import java.io.InputStream;
@@ -35,13 +34,9 @@ public class MainActivity extends Activity {
     private Thread mThread = null;
     private Socket mSocket = null;
 
-
-    private int test;
-
     private InputStream mInps = null;
-    //private BufferedReader mBufferedReader	= null;
     private PrintWriter mPrintWriter = null;
-    private  String recvMessage = "";
+    private String recvMessage = "";
 
     private List<SerMod> servlist = new ArrayList<SerMod>();
 
@@ -58,7 +53,6 @@ public class MainActivity extends Activity {
             {
                 tv_status.setText("Received Server Data: " + servlist.size() + " servers are online\n" + tv_status.getText().toString());
                 //tv_status.setText(servlist.get(0).ToStringExt() + "---" + servlist.get(1).ToStringExt());
-                tv_status.append("" + test);
                 btn_gtlist.setEnabled(true);
             }
             else if(msg.what == 1)
@@ -134,33 +128,21 @@ public class MainActivity extends Activity {
                 return;
             }
 
-            //char[] buffer = new char[MAX_BUFFER];
             byte[] buffer = new byte[MAX_BUFFER];
             int count = 0;
             while (isConnecting)
             {
                 try
                 {
-                    //count = mBufferedReader.read(buffer);
                     count = mInps.read(buffer);
-                    test = count;
                     if(count > 0) {
                         if (count != 1 && count % MdfySS == 0) {
-                            //byte[] byteData = new byte[MAX_BUFFER];
-                            //int len = mInps.read(byteData);
-                            //byteData = getBytes(buffer);
-                            //int len = minps.read(byteData);  // 136byte for each, '\0' in the last
                             servlist = new ArrayList<SerMod>();
                             int ctmp = count / MdfySS;
                             for (int i = 0; i < ctmp; i++) {
-                                //byte[] btm = new byte[MAX_BUFFER];
-                                //mInps.read(btm, 0, count);
-                                //byte[] btmp = getBytes(buffer);
                                 byte[] ele = new byte[MdfySS];
                                 System.arraycopy(buffer, i * MdfySS, ele, 0, MdfySS);
                                 SerMod tmp = new SerMod(ele);
-                                //recvMessage =tmp.getMsgHex(getBytes(btmp));
-                                //tmp.totalWload = 1.0;  // fix test
                                 servlist.add(tmp);
                             }
                             Message msg = new Message();
@@ -168,8 +150,6 @@ public class MainActivity extends Activity {
                             tHandler.sendMessage(msg);
                         }
                         else {
-                            //recvMessage = char2string(buffer, count);
-
                             recvMessage = char2string(getChars(buffer), count);
                             Message msg = new Message();
                             msg.what = 0;
@@ -193,8 +173,6 @@ public class MainActivity extends Activity {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main);
 
-        //setContentView(R.layout.activity_serv);
-
         et_ip = (EditText)findViewById(R.id.et_ip);
         tv_status = (TextView)findViewById(R.id.tv_status);
         btn_connect = (Button)findViewById(R.id.btn_connect);
@@ -203,7 +181,7 @@ public class MainActivity extends Activity {
         btn_connect.setEnabled(true);
         btn_gtlist.setEnabled(false);
 
-        et_ip.setText("192.168.1.58:18888");
+        //et_ip.setText("192.168.1.58:18888");
 
         btn_connect.setOnClickListener(new View.OnClickListener() {
             @Override
@@ -249,7 +227,6 @@ public class MainActivity extends Activity {
                 }
                 Intent intent = new Intent();
                 intent.putStringArrayListExtra("servlist", msg);
-                //intent.putExtra("serv", servlist.get(0).ToStringExt());
                 intent.setClass(MainActivity.this, MssActivity.class);
                 startActivity(intent);
             }

@@ -2,6 +2,8 @@ package com.sysmon.tab.sysmon;
 
 /**
  * Created by Tab on 2017-03-21.
+ * Data structure. 136 byte for each.
+ * int * 2, long * 4, double * 9,  int * 4, point(8byte)
  */
 
 public class SerMod {

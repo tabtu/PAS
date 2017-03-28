@@ -22,8 +22,6 @@ public class MssActivity extends Activity {
         setContentView(R.layout.activity_serv);
 
         ArrayList<String> prefix = getIntent().getStringArrayListExtra("servlist");
-        //String prefix = getIntent().getStringExtra("servlist");
-        //String[] stmp = prefix.split("/");
 
         servlist = new ArrayList<SerMod>();
         for (int i = 0; i < prefix.size(); i++)
