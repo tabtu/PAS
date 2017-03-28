@@ -69,10 +69,7 @@ public class ServAdapter extends BaseAdapter{
 
         }
 
-
-
-
-        holder.servname.setText("Branch:" + position);
+        holder.servname.setText("Slave:" + position);
 
         return convertView;
     }

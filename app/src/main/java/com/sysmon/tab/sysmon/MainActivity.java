@@ -5,19 +5,14 @@ import android.os.Bundle;
 import android.os.Handler;
 import android.os.Message;
 import android.view.View;
-import android.widget.AdapterView;
-import android.widget.ArrayAdapter;
 import android.widget.Button;
 import android.widget.EditText;
-import android.widget.ListView;
 import android.widget.TextView;
 import android.content.Intent;
+import android.widget.Toast;
 
-import java.io.BufferedReader;
 import java.io.IOException;
 import java.io.InputStream;
-import java.io.ByteArrayOutputStream;
-import java.io.InputStreamReader;
 import java.io.PrintWriter;
 import java.net.Socket;
 import java.util.List;
@@ -40,6 +35,9 @@ public class MainActivity extends Activity {
     private Thread mThread = null;
     private Socket mSocket = null;
 
+
+    private int test;
+
     private InputStream mInps = null;
     //private BufferedReader mBufferedReader	= null;
     private PrintWriter mPrintWriter = null;
@@ -58,8 +56,9 @@ public class MainActivity extends Activity {
             }
             else if(msg.what == -1)
             {
-                //tv_status.setText(recvMessage);
                 tv_status.setText("Received Server Data: " + servlist.size() + " servers are online\n" + tv_status.getText().toString());
+                //tv_status.setText(servlist.get(0).ToStringExt() + "---" + servlist.get(1).ToStringExt());
+                tv_status.append("" + test);
                 btn_gtlist.setEnabled(true);
             }
             else if(msg.what == 1)
@@ -119,7 +118,7 @@ public class MainActivity extends Activity {
                 //mBufferedReader = new BufferedReader(new InputStreamReader(mInps, "UTF-8"));
                 mPrintWriter = new PrintWriter(mSocket.getOutputStream(), true);
 
-                mPrintWriter.print("Get Server Information");
+                mPrintWriter.print("Android——GET");
                 mPrintWriter.flush();
 
                 Message msg = new Message();
@@ -144,8 +143,9 @@ public class MainActivity extends Activity {
                 {
                     //count = mBufferedReader.read(buffer);
                     count = mInps.read(buffer);
+                    test = count;
                     if(count > 0) {
-                        if (count != 1 && count % MdfySS == 1) {
+                        if (count != 1 && count % MdfySS == 0) {
                             //byte[] byteData = new byte[MAX_BUFFER];
                             //int len = mInps.read(byteData);
                             //byteData = getBytes(buffer);
@@ -203,7 +203,7 @@ public class MainActivity extends Activity {
         btn_connect.setEnabled(true);
         btn_gtlist.setEnabled(false);
 
-        //et_ip.setText("222.222.222.3:18888");
+        et_ip.setText("192.168.1.58:18888");
 
         btn_connect.setOnClickListener(new View.OnClickListener() {
             @Override

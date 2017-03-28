@@ -4,26 +4,14 @@ import android.app.Activity;
 import android.os.Bundle;
 import android.widget.ArrayAdapter;
 import android.widget.ListView;
-import android.widget.AdapterView.*;
-import android.view.View.OnClickListener;
-import android.widget.Adapter.*;
 import android.content.Intent;
-import android.app.Activity;
-import android.os.Bundle;
-import android.widget.ListView;
-import java.util.ArrayList;
-import java.util.List;
-import java.util.Map;
-import java.util.HashMap;
-import android.widget.SimpleAdapter;
 import android.view.View;
 import android.widget.AdapterView.OnItemClickListener;
 import android.widget.AdapterView;
-import android.widget.Adapter;
-import android.widget.Toast;
 
 import java.util.ArrayList;
 import java.util.List;
+
 public class MssActivity extends Activity {
 
     private static List<SerMod> servlist;
@@ -49,8 +37,8 @@ public class MssActivity extends Activity {
         List<String> data = new ArrayList<String>();
         for (int i = 0; i < servlist.size(); i++)
         {
-            if (i == 0) data.add("Master");
-            else data.add("Branch: " + i);
+            if (servlist.get(i).slave_index == 0) data.add("Master");
+            else data.add("Slave: " + servlist.get(i).slave_index);
         }
 
         ArrayAdapter<String> adapter=new ArrayAdapter<String>(MssActivity.this,android.R.layout.simple_list_item_1, data);

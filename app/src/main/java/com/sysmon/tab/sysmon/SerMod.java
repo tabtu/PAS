@@ -24,6 +24,7 @@ public class SerMod {
     public int phy_cpu_num;
     public int log_cpu_num;
     public int cpu_num;
+    public int slave_index;
 
     public SerMod(String tmp)
     {
@@ -47,6 +48,7 @@ public class SerMod {
         phy_cpu_num = Integer.parseInt(sers[15]);
         log_cpu_num = Integer.parseInt(sers[16]);
         cpu_num = Integer.parseInt(sers[17]);
+        slave_index = Integer.parseInt(sers[18]);
     }
 
     public SerMod()
@@ -69,6 +71,7 @@ public class SerMod {
         phy_cpu_num = 1;
         log_cpu_num = 1;
         cpu_num = 1;
+        slave_index = 1;
     }
 
     public SerMod(byte[] tmp)
@@ -111,6 +114,8 @@ public class SerMod {
         phy_cpu_num = (tmp[112] | tmp[113] << 8 | tmp[114] << 16 | tmp[115] << 24);
         log_cpu_num = (tmp[116] | tmp[117] << 8 | tmp[118] << 16 | tmp[119] << 24);
         cpu_num = (tmp[120] | tmp[121] << 8 | tmp[122] << 16 | tmp[123] << 24);
+        slave_index = (tmp[124] | tmp[125] << 8 | tmp[126] << 16 | tmp[127] << 24);
+
     }
 
 
@@ -153,6 +158,7 @@ public class SerMod {
         result += (phy_cpu_num + ";");
         result += (log_cpu_num + ";");
         result += (cpu_num + ";");
+        result += (slave_index + ";");
 
         return result;
     }
